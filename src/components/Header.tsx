@@ -4,15 +4,22 @@ import { formatTime } from "../lib/format";
 import type { DeviceStatus } from "../types/waterQuality";
 import { statusStyle } from "./StatusBadge";
 
-const NAV = ["Dashboard", "Monitoring", "Historical Data", "Predictions", "Alerts"];
+const NAV: TabName[] = ["Dashboard", "Monitoring", "Historical Data", "Predictions", "Alerts"];
+
+export type TabName = "Dashboard" | "Monitoring" | "Historical Data" | "Predictions" | "Alerts";
+export type AppMode = "demo" | "real";
 
 interface Props {
   device: DeviceStatus | null;
+  activeTab: TabName;
+  onNavigate: (tab: TabName) => void;
+  mode: AppMode;
+  onModeChange: (mode: AppMode) => void;
 }
 
-export default function Header({ device }: Props) {
+export default function Header({ device, activeTab, onNavigate, mode, onModeChange }: Props) {
   const [open, setOpen] = useState(false);
-  const [active, setActive] = useState("Dashboard");
+  const active = activeTab;
   const s = statusStyle(device?.state ?? "OFFLINE");
 
   return (
@@ -31,7 +38,7 @@ export default function Header({ device }: Props) {
           {NAV.map((n) => (
             <button
               key={n}
-              onClick={() => setActive(n)}
+              onClick={() => onNavigate(n as TabName)}
               className={`rounded px-3 py-1.5 text-sm ${
                 active === n ? "bg-aqua-50 font-medium text-aqua-700" : "text-ink-700 hover:bg-slate-100"
               }`}
@@ -58,6 +65,27 @@ export default function Header({ device }: Props) {
               </div>
             </div>
           </div>
+          <div
+            className="flex items-center rounded-full border border-slate-200 p-0.5 text-[10px] font-semibold"
+            role="group"
+            aria-label="Data mode"
+            title="Demo: recorded CSV station data (device DEMO-001) · Real: live ESP32 data"
+          >
+            {(["demo", "real"] as AppMode[]).map((m) => (
+              <button
+                key={m}
+                onClick={() => onModeChange(m)}
+                aria-pressed={mode === m}
+                className={`rounded-full px-2 py-0.5 uppercase tracking-wide ${
+                  mode === m
+                    ? m === "demo" ? "bg-sky-600 text-white" : "bg-emerald-600 text-white"
+                    : "text-ink-500 hover:bg-slate-100"
+                }`}
+              >
+                {m}
+              </button>
+            ))}
+          </div>
           <button
             className="rounded p-2 text-ink-700 hover:bg-slate-100 lg:hidden"
             aria-label="Toggle menu"
@@ -73,7 +101,7 @@ export default function Header({ device }: Props) {
           {NAV.map((n) => (
             <button
               key={n}
-              onClick={() => { setActive(n); setOpen(false); }}
+              onClick={() => { onNavigate(n as TabName); setOpen(false); }}
               className={`flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm ${
                 active === n ? "bg-aqua-50 font-medium text-aqua-700" : "text-ink-700"
               }`}

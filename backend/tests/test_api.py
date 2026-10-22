@@ -130,10 +130,63 @@ def test_alerts_generated_and_persisted_for_abnormal_reading(client):
     assert turb["severity"] == "CRITICAL"  # 9.5 is >25% of range width above max 5
 
 
-def test_prediction_rule_based_when_no_model(client, monkeypatch):
-    monkeypatch.setenv("ML_MODEL_PATH", "/nonexistent/best_model.pt")
+def test_prediction_latest_includes_rule_and_ml(client):
     client.post("/api/v1/readings", json=ABNORMAL)
     pred = client.get("/api/v1/predictions/latest").json()
-    assert pred["rule_based_label"] == "ABNORMAL"
-    assert pred["label"] == "ABNORMAL"
+    assert pred["rule_based_label"] == "ABNORMAL"   # turbidity/tds/EC far out of range
+    assert pred["ml_available"] is True            # exported numpy weights ship in-app
+    assert pred["label"] in ("NORMAL", "WARNING", "ABNORMAL")
     assert 0.0 <= pred["anomaly_score"] <= 1.0
+
+
+def test_prediction_fallback_when_ml_unavailable(client, monkeypatch):
+    """If neither numpy weights nor torch can load, predictions must fall
+    back to rule-based with confidence null — never a fabricated number."""
+    import app.services.ml_inference as ml
+
+    monkeypatch.setitem(ml._np_cache, "loaded", True)
+    monkeypatch.setitem(ml._np_cache, "data", None)
+    monkeypatch.setitem(ml._torch_cache, "loaded", True)
+    monkeypatch.setitem(ml._torch_cache, "paths", ("/nonexistent/best_model.pt", "/nonexistent/scaler.json"))
+    monkeypatch.setitem(ml._torch_cache, "model", None)
+    monkeypatch.setitem(ml._torch_cache, "scaler", None)
+    client.post("/api/v1/readings", json=ABNORMAL)
+    pred = client.get("/api/v1/predictions/latest").json()
+    assert pred["ml_available"] is False
+    assert pred["label"] == "ABNORMAL"              # rule-based label takes over
+    assert pred["confidence"] is None
+
+
+def test_manual_prediction_uses_exported_ml_weights(client):
+    r = client.post("/api/v1/predictions/manual", json={
+        "ph": 7.24, "turbidity": 3.42, "temperature": 26.8,
+        "tds": 318, "conductivity": 642, "dissolved_oxygen": 6.7})
+    assert r.status_code == 200, r.text
+    d = r.json()
+    assert d["ml_available"] is True            # numpy weights ship with the app
+    assert d["label"] in ("NORMAL", "WARNING", "ABNORMAL")
+    assert d["confidence"] is not None and 0 <= d["confidence"] <= 100
+    assert abs(sum(d["probabilities"].values()) - 100) < 0.5
+    assert d["features_used_by_model"] == ["ph", "temperature", "dissolvedOxygen", "conductivity"]
+    # manual predictions must not be stored as readings
+    assert client.get("/api/v1/readings/history").json() == []
+
+
+def test_manual_prediction_rejects_implausible(client):
+    r = client.post("/api/v1/predictions/manual", json={
+        "ph": 42, "temperature": 26.8, "conductivity": 642, "dissolved_oxygen": 6.7})
+    assert r.status_code == 422
+
+
+def test_maintenance_flags_stuck_sensor(client):
+    stuck = {"device_id": "ESP32-001", "ph": 7.0, "turbidity": 3.0,
+             "temperature": 25.0, "tds": 300, "conductivity": 600,
+             "dissolved_oxygen": 6.5}
+    for minute in range(12):  # 12 identical readings => stuck on every parameter
+        payload = {**stuck, "timestamp": f"2026-10-22T12:{minute:02d}:00Z"}
+        assert client.post("/api/v1/readings", json=payload).status_code == 201
+    m = client.get("/api/v1/maintenance", params={"device_id": "ESP32-001"}).json()
+    assert m["overall"] == "SERVICE"
+    ph = next(s for s in m["sensors"] if s["parameter"] == "ph")
+    assert ph["health"] == "SERVICE"
+    assert any("stuck" in r for r in ph["reasons"])

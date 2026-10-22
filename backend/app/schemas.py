@@ -149,3 +149,56 @@ class HealthOut(BaseModel):
     status: str
     database: str
     timestamp: datetime
+
+
+class ManualPredictionRequest(BaseModel):
+    """Values typed into the dashboard's 'Test DL model' form.
+    All six are assessed by the rule engine; the DL model itself was
+    trained on four of them (see features_used in the response)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    ph: float
+    turbidity: float | None = None
+    temperature: float
+    tds: float | None = None
+    conductivity: float
+    dissolved_oxygen: float
+
+    @field_validator("ph", "turbidity", "temperature", "tds", "conductivity", "dissolved_oxygen")
+    @classmethod
+    def _plausible(cls, v, info):
+        return _check_plausible(info.field_name, v)
+
+
+class ManualPredictionOut(BaseModel):
+    label: str  # ML label when available, else rule-based label
+    confidence: float | None  # ML softmax % for the label; null when ML unavailable
+    probabilities: dict[str, float] | None  # per-class ML probabilities %
+    rule_based_label: str
+    assessments: list[ParameterAssessment]
+    anomaly_score: float
+    model_name: str
+    ml_available: bool
+    features_used_by_model: list[str]
+    note: str
+
+
+class SensorMaintenance(BaseModel):
+    parameter: str
+    label: str
+    health: str  # OK | CHECK | SERVICE
+    reasons: list[str]
+    last_value: float | None
+    present: int
+    missing_pct: float
+    out_of_range_pct: float | None
+
+
+class MaintenanceOut(BaseModel):
+    device_id: str
+    overall: str  # OK | CHECK | SERVICE
+    window_readings: int
+    last_reading_age_seconds: float | None
+    sensors: list[SensorMaintenance]
+    disclaimer: str

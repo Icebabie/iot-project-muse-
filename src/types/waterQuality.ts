@@ -93,3 +93,38 @@ export interface DeviceStatus {
   backend: "CONNECTED" | "MOCK";
   database: "CONNECTED" | "MOCK" | "ERROR";
 }
+
+// ---- Predictive maintenance (GET /api/v1/maintenance) ----
+export type SensorHealth = "OK" | "CHECK" | "SERVICE";
+export interface SensorMaintenance {
+  parameter: ParameterKey;
+  label: string;
+  health: SensorHealth;
+  reasons: string[];
+  lastValue: number | null;
+  present: number;
+  missingPct: number;
+  outOfRangePct: number | null;
+}
+export interface Maintenance {
+  deviceId: string;
+  overall: SensorHealth;
+  windowReadings: number;
+  lastReadingAgeSeconds: number | null;
+  sensors: SensorMaintenance[];
+  disclaimer: string;
+}
+
+// ---- Manual DL test (POST /api/v1/predictions/manual) ----
+export interface ManualPrediction {
+  label: OverallStatus;
+  confidence: number | null;
+  probabilities: Record<string, number> | null;
+  ruleBasedLabel: OverallStatus;
+  anomalyScore: number;
+  modelName: string;
+  mlAvailable: boolean;
+  featuresUsedByModel: string[];
+  note: string;
+  assessments: { parameter: string; label: string; value: number | null; unit: string; status: string }[];
+}

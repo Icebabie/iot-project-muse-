@@ -15,7 +15,7 @@ from sqlalchemy import text
 
 from .config import Settings, get_settings
 from .db import init_db, make_engine, make_session_factory
-from .routers import alerts, device, predictions, readings
+from .routers import alerts, device, maintenance, predictions, readings
 from .schemas import HealthOut
 
 
@@ -63,6 +63,7 @@ def create_app(settings: Settings | None = None, **overrides) -> FastAPI:
     app.include_router(alerts.router)
     app.include_router(device.router)
     app.include_router(predictions.router)
+    app.include_router(maintenance.router)
     return app
 
 

@@ -36,3 +36,8 @@ export function getOverallStatus(params: SensorParameter[]): OverallStatus {
   if (params.some((p) => p.status === "WARNING")) return "WARNING";
   return "NORMAL";
 }
+
+/** Overall status of a single stored reading (for the Historical Data table). */
+export function getReadingStatus(reading: SensorReading): OverallStatus {
+  return getOverallStatus(buildParameters(reading));
+}

@@ -3,6 +3,7 @@ uvicorn[standard]>=0.30
 sqlalchemy>=2.0
 psycopg[binary]>=3.1  # PostgreSQL driver (Neon in production); unused for local SQLite
 pydantic>=2.7
+numpy>=1.26  # ML inference (exported weights); torch is NOT required in production
 # tests / test client
 pytest>=8.0
 httpx>=0.27
