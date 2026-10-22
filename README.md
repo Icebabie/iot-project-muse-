@@ -51,3 +51,23 @@ npm run dev                  # http://localhost:5173
 cd backend && pytest -q      # API acceptance, validation, persistence, alerts
 npm run build                # frontend type-check + production build
 ```
+
+## Dashboard tabs & Demo/Real modes
+
+Tabs: **Dashboard** (overview), **Monitoring** (live per-parameter charts, red
+where a value leaves its configured range), **Historical Data** (recorded
+readings table from the database), **Predictions** ('Test DL Model' form with
+confidence + class probabilities, model evaluation with confusion matrix,
+sensor predictive maintenance), **Alerts** (full list, severity filters).
+
+The **Demo/Real switch** (top-right of the header) changes only which device
+the UI reads: Demo = `DEMO-001`, fed live from recorded aqua-CSV station rows
+through the same API; Real = the ESP32 device id. Both live in the same
+database under separate ids — connecting real hardware later needs no reset.
+
+New API routes: `POST /api/v1/predictions/manual` (DL test form; stores
+nothing) and `GET /api/v1/maintenance` (heuristic sensor-health indicators:
+stuck values, drift, missing data). Production DL inference uses NumPy on
+weights exported from the PyTorch artifact (`backend/ml/export_weights.py`,
+verified: accuracy 0.759 / macro-F1 0.793 on the held-out test set), so the
+free-tier backend needs no PyTorch install.
