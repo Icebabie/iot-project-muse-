@@ -57,10 +57,13 @@ See `.env.example`. Key variables: `DATABASE_URL`, `CORS_ORIGINS`,
 `CORS_ORIGIN_REGEX` (Vercel), `DEVICE_ONLINE_WINDOW_SECONDS` (default 180),
 `DEFAULT_DEVICE_ID`, `ML_MODEL_PATH`, `ML_SCALER_PATH`. No secrets in code.
 
-## Production deployment sketch
+## Production deployment
 
-1. Provision PostgreSQL; set `DATABASE_URL=postgresql+psycopg://…` (add
-   `psycopg[binary]` to the server's requirements).
+Free-tier walkthrough (Render + Neon, $0, no card): see
+`../docs/DEPLOYMENT_FREE.md`. The repo root has a `render.yaml` Blueprint,
+and `psycopg[binary]` is already in requirements.txt.
+
+1. Provision PostgreSQL; set `DATABASE_URL=postgresql+psycopg://…`.
 2. Run behind a process manager / container: `uvicorn app.main:app --host 0.0.0.0 --port 8000`
    (Render, Railway, Fly.io, a VPS, etc. all work — it is a plain ASGI app).
 3. Set `CORS_ORIGINS` to your Vercel domain (the default regex already

@@ -1,6 +1,7 @@
 fastapi>=0.115
 uvicorn[standard]>=0.30
 sqlalchemy>=2.0
+psycopg[binary]>=3.1  # PostgreSQL driver (Neon in production); unused for local SQLite
 pydantic>=2.7
 # tests / test client
 pytest>=8.0

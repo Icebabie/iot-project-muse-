@@ -1,0 +1,25 @@
+# Render Blueprint — free-tier deployment of the FastAPI backend.
+# Use: Render Dashboard -> New -> Blueprint -> connect this repo.
+# (Manual alternative: New -> Web Service and copy these same settings.)
+services:
+  - type: web
+    name: water-quality-api
+    env: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.3
+      # Paste your Neon connection string in the Render dashboard,
+      # with the driver added: postgresql+psycopg://user:pass@host/db?sslmode=require
+      - key: DATABASE_URL
+        sync: false
+      - key: DEFAULT_DEVICE_ID
+        value: ESP32-001
+      - key: DEVICE_ONLINE_WINDOW_SECONDS
+        value: "180"
+      - key: CORS_ORIGIN_REGEX
+        value: https://.*\.vercel\.app
