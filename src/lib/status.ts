@@ -20,11 +20,12 @@ export function getParameterStatus(value: number, cfg: ParameterConfig): Paramet
 export function buildParameters(latest: SensorReading, previous?: SensorReading): SensorParameter[] {
   return PARAMETERS.map((config) => {
     const value = latest[config.key];
+    const prevValue = previous?.[config.key];
     return {
       config,
       value,
-      status: getParameterStatus(value, config),
-      delta: previous ? value - previous[config.key] : 0,
+      status: value === null ? "UNAVAILABLE" : getParameterStatus(value, config),
+      delta: value !== null && prevValue != null ? value - prevValue : 0,
       timestamp: latest.timestamp,
     };
   });

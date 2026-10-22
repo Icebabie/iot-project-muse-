@@ -1,0 +1,46 @@
+{
+  "source": "processed/aqua_clean_full.csv",
+  "rows": 1361,
+  "seed": 42,
+  "tds": {
+    "method": "tds = 0.64 * conductivity (copied from source column tds_derived)",
+    "is_derived": true,
+    "warning": "Perfectly collinear with conductivity; adds no information beyond EC.",
+    "describe": {
+      "count": 1361.0,
+      "mean": 699.99,
+      "std": 1775.83,
+      "min": 29.5,
+      "25%": 144.0,
+      "50%": 266.6,
+      "75%": 486.6,
+      "max": 13055.3
+    }
+  },
+  "turbidity": {
+    "method": "ln(turb) = ln(2.8) + 0.30*z(bod_log10) + 0.20*z(total_coliform_log10) + N(0, 0.35), clip 0.1-80 NTU",
+    "is_synthetic": true,
+    "warning": "NOT measured. Metrics of a model trained on this column are circular/optimistic and must not be reported as real performance.",
+    "describe": {
+      "count": 1361.0,
+      "mean": 3.19,
+      "std": 1.95,
+      "min": 0.56,
+      "25%": 1.96,
+      "50%": 2.73,
+      "75%": 3.86,
+      "max": 24.75
+    },
+    "pct_within_dashboard_range_0_5_NTU": 88.5,
+    "reference_check": "Kaggle file in this repo (measured): turbidity median 3.96 NTU, range 2.15-5.76."
+  },
+  "six_parameters": [
+    "ph",
+    "turbidity",
+    "temperature",
+    "tds",
+    "conductivity",
+    "dissolvedOxygen"
+  ],
+  "target_unchanged": "cpcb_tier (illustrative CPCB grouping \u2014 see processed/README.md)"
+}

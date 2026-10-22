@@ -52,12 +52,12 @@ export function nextReading(prev: SensorReading, timestamp: Date, rand: () => nu
   return {
     deviceId: prev.deviceId,
     timestamp: timestamp.toISOString(),
-    ph: step(prev.ph, BASELINE.ph, NOISE.ph, 2),
-    turbidity: Math.max(0, step(prev.turbidity, BASELINE.turbidity, NOISE.turbidity, 2)),
-    temperature: step(prev.temperature, BASELINE.temperature, NOISE.temperature, 1),
-    tds: Math.round(step(prev.tds, BASELINE.tds, NOISE.tds, 0)),
-    conductivity: Math.round(step(prev.conductivity, BASELINE.conductivity, NOISE.conductivity, 0)),
-    dissolvedOxygen: step(prev.dissolvedOxygen, BASELINE.dissolvedOxygen, NOISE.dissolvedOxygen, 1),
+    ph: step(prev.ph ?? BASELINE.ph, BASELINE.ph, NOISE.ph, 2),
+    turbidity: Math.max(0, step(prev.turbidity ?? BASELINE.turbidity, BASELINE.turbidity, NOISE.turbidity, 2)),
+    temperature: step(prev.temperature ?? BASELINE.temperature, BASELINE.temperature, NOISE.temperature, 1),
+    tds: Math.round(step(prev.tds ?? BASELINE.tds, BASELINE.tds, NOISE.tds, 0)),
+    conductivity: Math.round(step(prev.conductivity ?? BASELINE.conductivity, BASELINE.conductivity, NOISE.conductivity, 0)),
+    dissolvedOxygen: step(prev.dissolvedOxygen ?? BASELINE.dissolvedOxygen, BASELINE.dissolvedOxygen, NOISE.dissolvedOxygen, 1),
   };
 }
 

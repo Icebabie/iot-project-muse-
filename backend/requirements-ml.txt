@@ -1,0 +1,7 @@
+# Optional: only needed for PyTorch ML inference + anomaly-model training.
+# The API runs (rule-based) without these.
+-r requirements.txt
+torch>=2.2
+pandas>=2.0
+scikit-learn>=1.4
+joblib>=1.3

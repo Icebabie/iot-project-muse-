@@ -34,10 +34,10 @@ export default function DeviceStatus({ device }: { device: DeviceStatusT }) {
         <Row label="ESP32 Device" value={device.state === "ONLINE" ? "Online" : device.state === "OFFLINE" ? "Offline" : "Degraded"} tone={device.state === "ONLINE" ? "good" : device.state === "OFFLINE" ? "bad" : "warn"} />
         <Row label="Wi-Fi" value={device.wifi === "CONNECTED" ? "Connected" : "Disconnected"} tone={device.wifi === "CONNECTED" ? "good" : "bad"} />
         <Row label="Data ingestion" value={device.dataIngestion === "ACTIVE" ? "Active" : "Stalled"} tone={device.dataIngestion === "ACTIVE" ? "good" : "warn"} />
-        <Row label="Last data packet" value={formatTime(device.lastPacket)} tone="plain" />
+        <Row label="Last data packet" value={device.lastPacket ? formatTime(device.lastPacket) : "No data yet"} tone="plain" />
         <Row label="Sensor status" value={`${device.sensorsActive} / ${device.sensorsTotal} Active`} tone={sensorsOk ? "good" : "warn"} />
         <Row label="Backend / API" value={device.backend === "MOCK" ? "Mock / Not Connected" : "Connected"} tone={device.backend === "MOCK" ? "mock" : "good"} />
-        <Row label="Database" value={device.database === "MOCK" ? "Mock / Not Connected" : "Connected"} tone={device.database === "MOCK" ? "mock" : "good"} />
+        <Row label="Database" value={device.database === "MOCK" ? "Mock / Not Connected" : device.database === "ERROR" ? "Error" : "Connected"} tone={device.database === "MOCK" ? "mock" : device.database === "ERROR" ? "bad" : "good"} />
       </div>
     </section>
   );

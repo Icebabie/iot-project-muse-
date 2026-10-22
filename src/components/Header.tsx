@@ -54,7 +54,7 @@ export default function Header({ device }: Props) {
                 {device?.deviceId ?? "—"} <span className="font-normal text-ink-500">· {device ? device.state[0] + device.state.slice(1).toLowerCase() : "…"}</span>
               </div>
               <div className="hidden font-mono text-[11px] text-ink-500 sm:block">
-                Last updated: {device ? formatTime(device.lastPacket) : "--:--:--"}
+                Last updated: {device?.lastPacket ? formatTime(device.lastPacket) : "--:--:--"}
               </div>
             </div>
           </div>

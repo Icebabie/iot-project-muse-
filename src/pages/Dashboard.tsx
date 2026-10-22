@@ -14,7 +14,7 @@ import { buildParameters, getOverallStatus } from "../lib/status";
 
 export default function Dashboard() {
   const [autoRefresh, setAutoRefresh] = useState(true);
-  const { latest, previous, history, alerts, prediction, device, loading, error } =
+  const { latest, previous, history, alerts, prediction, device, loading, error, stale } =
     useWaterQualityData(autoRefresh);
 
   const params = useMemo(
@@ -53,11 +53,29 @@ export default function Dashboard() {
         </div>
 
         {error && (
-          <div className="rounded border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">{error}</div>
+          <div className="rounded border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+            Could not reach the backend API. Check that FastAPI is running and VITE_API_BASE_URL is set. ({error})
+          </div>
         )}
 
-        {loading || !latest || !prediction || !device ? (
+        {stale && latest && (
+          <div className="rounded border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800">
+            Stale data — the last reading is more than 3 minutes old. The device may be offline.
+          </div>
+        )}
+
+        {loading ? (
           <div className="panel p-10 text-center text-sm text-ink-500">Loading sensor data…</div>
+        ) : !latest ? (
+          <div className="panel space-y-2 p-10 text-center text-sm text-ink-500">
+            <p className="font-medium text-ink-700">No sensor readings yet</p>
+            <p>
+              The backend is reachable but has no stored data for this device. Start the simulator
+              (<span className="font-mono">python backend/simulator/simulator.py</span>) or connect
+              the ESP32 — readings will appear here automatically.
+            </p>
+            {device && <div className="mx-auto max-w-md pt-2 text-left"><DeviceStatus device={device} /></div>}
+          </div>
         ) : (
           <>
             <section aria-label="Current sensor readings">
@@ -80,11 +98,17 @@ export default function Dashboard() {
 
             <div className="grid gap-5 lg:grid-cols-5">
               <div className="lg:col-span-3"><AlertsPanel alerts={alerts} /></div>
-              <div className="lg:col-span-2"><PredictionCard prediction={prediction} /></div>
+              <div className="lg:col-span-2">
+                {prediction ? (
+                  <PredictionCard prediction={prediction} />
+                ) : (
+                  <section className="panel p-6 text-sm text-ink-500">No prediction available yet.</section>
+                )}
+              </div>
             </div>
 
             <ParameterTable params={params} />
-            <DeviceStatus device={device} />
+            {device && <DeviceStatus device={device} />}
           </>
         )}
 

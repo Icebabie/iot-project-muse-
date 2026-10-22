@@ -17,13 +17,15 @@ export interface DashboardData {
   device: DeviceStatus | null;
   loading: boolean;
   error: string | null;
+  /** Latest reading is older than the backend's online window (3 min). */
+  stale: boolean;
 }
 
 /** Loads everything through the service layer and polls on an interval. */
 export function useWaterQualityData(autoRefresh: boolean, intervalMs = 5000): DashboardData {
   const [data, setData] = useState<DashboardData>({
     latest: null, previous: null, history: [], alerts: [], prediction: null, device: null,
-    loading: true, error: null,
+    loading: true, error: null, stale: false,
   });
   const latestRef = useRef<SensorReading | null>(null);
 
@@ -35,7 +37,10 @@ export function useWaterQualityData(autoRefresh: boolean, intervalMs = 5000): Da
       ]);
       const previous = latestRef.current;
       latestRef.current = latest;
-      setData({ latest, previous, history, alerts, prediction, device, loading: false, error: null });
+      const stale = latest
+        ? Date.now() - new Date(latest.timestamp).getTime() > 180_000
+        : false;
+      setData({ latest, previous, history, alerts, prediction, device, loading: false, error: null, stale });
     } catch (e) {
       setData((d) => ({ ...d, loading: false, error: e instanceof Error ? e.message : "Failed to load data" }));
     }

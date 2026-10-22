@@ -1,4 +1,5 @@
-export const formatValue = (v: number, decimals: number) => v.toFixed(decimals);
+export const formatValue = (v: number | null, decimals: number) =>
+  v === null || v === undefined ? "—" : v.toFixed(decimals);
 
 export const formatTime = (iso: string, withSeconds = true) =>
   new Date(iso).toLocaleTimeString("en-US", {

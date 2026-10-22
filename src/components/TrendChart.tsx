@@ -14,8 +14,8 @@ export default function TrendChart({ history }: { history: SensorReading[] }) {
     () => history.map((r) => ({ t: formatTime(r.timestamp, false), v: r[selected] })),
     [history, selected],
   );
-  const values = series.map((s) => s.v);
-  const current = values[values.length - 1];
+  const values = series.map((s) => s.v).filter((v): v is number => v !== null);
+  const current = values.length ? values[values.length - 1] : 0;
   const min = values.length ? Math.min(...values) : 0;
   const max = values.length ? Math.max(...values) : 0;
   const avg = values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0;
@@ -87,7 +87,7 @@ export default function TrendChart({ history }: { history: SensorReading[] }) {
               contentStyle={{ fontSize: 12, borderRadius: 4, border: "1px solid #e2e8f0" }}
               formatter={(v: number) => [`${formatValue(v, cfg.decimals)} ${cfg.unit}`, cfg.label]}
             />
-            <Line type="monotone" dataKey="v" stroke="#1d7fa8" strokeWidth={2} dot={false} activeDot={{ r: 4 }} isAnimationActive={false} />
+            <Line type="monotone" dataKey="v" stroke="#1d7fa8" strokeWidth={2} dot={false} activeDot={{ r: 4 }} isAnimationActive={false} connectNulls />
           </LineChart>
         </ResponsiveContainer>
       </div>

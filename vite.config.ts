@@ -1,8 +1,9 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-// When the FastAPI backend exists, add a dev proxy here, e.g.
-// server: { proxy: { "/api": "http://localhost:8000" } }
+// The dashboard calls the FastAPI backend directly via VITE_API_BASE_URL
+// (see src/services/waterQualityService.ts); the backend configures CORS
+// for localhost + Vercel, so no dev proxy is needed.
 export default defineConfig({
   plugins: [react()],
 });

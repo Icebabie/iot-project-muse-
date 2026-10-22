@@ -5,7 +5,7 @@ import StatusBadge from "./StatusBadge";
 
 export default function PredictionCard({ prediction }: { prediction: Prediction }) {
   const rows = [
-    { label: "Confidence", value: `${prediction.confidence.toFixed(1)}%` },
+    { label: "Confidence", value: prediction.confidence === null ? "— (rule-based)" : `${prediction.confidence.toFixed(1)}%` },
     { label: "Anomaly score", value: prediction.anomalyScore.toFixed(2) },
     { label: "Model", value: prediction.modelName },
   ];
@@ -23,6 +23,11 @@ export default function PredictionCard({ prediction }: { prediction: Prediction 
           Demo prediction • ML model integration pending
         </div>
       )}
+      {prediction.confidence === null && !prediction.isDemo && (
+        <div className="border-b border-slate-200 bg-slate-50 px-4 py-1.5 text-[11px] font-medium text-ink-500">
+          Rule-based assessment • ML model not loaded on the backend
+        </div>
+      )}
 
       <div className="p-4">
         <div className="flex items-center justify-between">
@@ -35,7 +40,7 @@ export default function PredictionCard({ prediction }: { prediction: Prediction 
 
         <div className="mt-3">
           <div className="h-1.5 rounded-full bg-slate-100">
-            <div className="h-full rounded-full bg-aqua-500" style={{ width: `${prediction.confidence}%` }} />
+            <div className="h-full rounded-full bg-aqua-500" style={{ width: `${prediction.confidence ?? 0}%` }} />
           </div>
         </div>
 

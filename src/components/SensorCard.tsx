@@ -53,10 +53,12 @@ export default function SensorCard({ param }: { param: SensorParameter }) {
             className="absolute inset-y-0 rounded-full bg-emerald-100"
             style={{ left: `${pct(range.min)}%`, width: `${pct(range.max) - pct(range.min)}%` }}
           />
-          <div
-            className={`absolute top-1/2 h-3.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-sm ${BAR_COLOR[status]}`}
-            style={{ left: `${pct(value)}%` }}
-          />
+          {value !== null && status !== "UNAVAILABLE" && (
+            <div
+              className={`absolute top-1/2 h-3.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-sm ${BAR_COLOR[status as keyof typeof BAR_COLOR]}`}
+              style={{ left: `${pct(value)}%` }}
+            />
+          )}
         </div>
         <div className="mt-1.5 flex justify-between font-mono text-[10px] text-ink-500">
           <span>{scale.min}</span>

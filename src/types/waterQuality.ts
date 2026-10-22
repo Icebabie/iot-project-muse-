@@ -19,15 +19,16 @@ export interface SensorReading {
   deviceId: string;
   /** ISO-8601 timestamp */
   timestamp: string;
-  ph: number;
-  turbidity: number;
-  temperature: number;
-  tds: number;
-  conductivity: number;
-  dissolvedOxygen: number;
+  /** null = sensor unavailable / not installed — never an invented value */
+  ph: number | null;
+  turbidity: number | null;
+  temperature: number | null;
+  tds: number | null;
+  conductivity: number | null;
+  dissolvedOxygen: number | null;
 }
 
-export type ParameterStatus = "NORMAL" | "WARNING" | "CRITICAL";
+export type ParameterStatus = "NORMAL" | "WARNING" | "CRITICAL" | "UNAVAILABLE";
 export type OverallStatus = "NORMAL" | "WARNING" | "ABNORMAL";
 
 /** Static description of a parameter: label, unit, configured range. */
@@ -46,7 +47,7 @@ export interface ParameterConfig {
 /** A parameter's latest value combined with its config and derived status. */
 export interface SensorParameter {
   config: ParameterConfig;
-  value: number;
+  value: number | null;
   status: ParameterStatus;
   /** Change vs. the previous reading, in parameter units. */
   delta: number;
@@ -68,8 +69,8 @@ export interface Alert {
 
 export interface Prediction {
   label: OverallStatus;
-  /** 0–100 */
-  confidence: number;
+  /** 0–100, from the ML model's softmax. null when rule-based only (no model loaded). */
+  confidence: number | null;
   anomalyScore: number;
   modelName: string;
   contributingParameters: ParameterKey[];
@@ -85,9 +86,10 @@ export interface DeviceStatus {
   state: ConnectionState;
   wifi: "CONNECTED" | "DISCONNECTED";
   dataIngestion: "ACTIVE" | "STALLED";
-  lastPacket: string;
+  /** ISO-8601, or null when no packet has ever been received */
+  lastPacket: string | null;
   sensorsActive: number;
   sensorsTotal: number;
   backend: "CONNECTED" | "MOCK";
-  database: "CONNECTED" | "MOCK";
+  database: "CONNECTED" | "MOCK" | "ERROR";
 }

@@ -3,3 +3,9 @@ __pycache__/
 *.pyc
 node_modules/
 .env
+dist/
+.env.local
+backend/.venv/
+backend/water_quality.db
+backend/*.db
+results/isolation_forest.joblib
